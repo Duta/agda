@@ -1,5 +1,9 @@
 module HoTT where
 
+id : {X : Set} →
+     X → X
+id x = x
+
 {- Judgemental Equality -}
 data _≡_ {X : Set} : X → X → Set where
   refl : {x : X} → x ≡ x
@@ -118,7 +122,7 @@ ind_nat {C} {succ n} c₀ cs = cs n (ind c₀ nat cs)
 
 -- Example functions
 double = rec_nat zero (λ n → λ y → succ (succ y))
-add = rec_nat (λ n → n) (λ n → λ g → λ m → succ (g m))
+add = rec_nat id (λ n → λ g → λ m → succ (g m))
 
 assoc_add : ∀ i j k → add i (add j k) ≡ add (add i j) k
 assoc_add zero j k = refl
