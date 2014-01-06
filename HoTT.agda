@@ -22,7 +22,7 @@ ap f refl = refl
 
 {- Dependent Pair Types -}
 data Σ {A : Set} (B : A → Set) : Set where
-  _,_ : (x : A) (y : B x) → Σ {A} B
+  _,_ : (x : A) → B x → Σ {A} B
 
 π₁ : {A : Set} {B : A → Set} →
      (Σ \(x : A) → B x) → A
@@ -230,3 +230,12 @@ add-magma = add , assoc-add
    where
     IH : add i (add j k) ≡ add (add i j) k
     IH = assoc-add i j k
+
+{- Path induction -}
+path-ind : {A : Set} {C : (x y : A) → x ≡ y → Set} →
+           ((x : A) → C x x refl) → (x y : A) → (p : x ≡ y) → C x y p
+path-ind c .x x refl = c x
+
+based-path-ind : {A : Set} {a : A} {C : (x : A) → a ≡ x → Set} →
+                 C a refl → (x : A) → (p : a ≡ x) → C x p
+based-path-ind c a refl = c
