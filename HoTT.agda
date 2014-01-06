@@ -124,12 +124,12 @@ ind-nat {C} {succ n} c₀ cs = cs n (ind-nat c₀ cs)
 double = rec-nat zero (λ n → λ y → succ (succ y))
 add = rec-nat id (λ n → λ g → λ m → succ (g m))
 
-assoc-add : ∀ i j k → add i (add j k) ≡ add (add i j) k
-assoc-add zero j k = refl
-assoc-add (succ i) j k = ap succ IH
- where
-  IH : add i (add j k) ≡ add (add i j) k
-  IH = assoc-add i j k
+-- Inequalities
+_≤_ : ℕ → ℕ → Set
+n ≤ m = Σ \k → (add n k ≡ m)
+
+_<_ : ℕ → ℕ → Set
+n < m = Σ \k → (add n (succ k) ≡ m)
 
 {- Fins -}
 data Fin : ℕ → Set where
@@ -201,7 +201,7 @@ de-morgan-2 = l2r , r2l
   l2r (inr b) (x , y) = b y
   r2l : {A B : Set} →
         not (A and B) implies (not A or not B)
-  r2l {A} {B} p = inl {!!}
+  r2l {A} {B} p = inl {!!} -- Unprovable?
 
 and-in-out : {A : Set} {P Q : A → Set} →
              ((x : A) → P x and Q x) iff (for-all A P and for-all A Q)
@@ -213,3 +213,20 @@ and-in-out = l2r , r2l
   r2l : {A : Set} {P Q : A → Set} →
         (for-all A P and for-all A Q) implies ((x : A) → P x and Q x)
   r2l p = λ x → π₁ p x , π₂ p x
+
+{- Semigroups -}
+semigroup : {A : Set} → Set
+semigroup {A} = Σ \(m : A → A → A) →
+                (x y z : A) →
+                m x (m y z) ≡ m (m x y) z
+
+-- Examples
+add-magma : semigroup {ℕ}
+add-magma = add , assoc-add
+ where
+  assoc-add : ∀ i j k → add i (add j k) ≡ add (add i j) k
+  assoc-add zero j k = refl
+  assoc-add (succ i) j k = ap succ IH
+   where
+    IH : add i (add j k) ≡ add (add i j) k
+    IH = assoc-add i j k
