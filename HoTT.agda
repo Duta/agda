@@ -33,14 +33,14 @@ data Σ {A : Set} (B : A → Set) : Set where
 π₂ (x , y) = y
 
 -- Recursor
-rec_deppair : {A C : Set} {B : A → Set} →
+rec-deppair : {A C : Set} {B : A → Set} →
               ({x : A} → B x → C) → Σ B → C
-rec_deppair g (a , b) = g {a} b
+rec-deppair g (a , b) = g {a} b
 
 -- Induction
-ind_deppair : {A : Set} {B : A → Set} {C : Σ B → Set} →
+ind-deppair : {A : Set} {B : A → Set} {C : Σ B → Set} →
               ({a : A} {b : B a} → C (a , b)) → (p : Σ B) → C p
-ind_deppair g (a , b) = g {a} {b}
+ind-deppair g (a , b) = g {a} {b}
 
 {- Product Types -}
 _×_ : Set → Set → Set
@@ -52,16 +52,16 @@ data _+_ (A B : Set) : Set where
   inr : B → A + B
 
 -- Recursor
-rec_coprod : {A B C : Set} →
+rec-coprod : {A B C : Set} →
              (A → C) → (B → C) → (A + B) → C
-rec_coprod g₀ g₁ (inl a) = g₀ a
-rec_coprod g₀ g₁ (inr b) = g₁ b
+rec-coprod g₀ g₁ (inl a) = g₀ a
+rec-coprod g₀ g₁ (inr b) = g₁ b
 
 -- Induction
-ind_coprod : {A B : Set} {C : A + B → Set} {x : A + B} →
+ind-coprod : {A B : Set} {C : A + B → Set} {x : A + B} →
              ({a : A} → C (inl a)) → ({b : B} → C (inr b)) → C x
-ind_coprod {A} {B} {C} {inl a} g₀ g₁ = g₀
-ind_coprod {A} {B} {C} {inr b} g₀ g₁ = g₁
+ind-coprod {A} {B} {C} {inl a} g₀ g₁ = g₀
+ind-coprod {A} {B} {C} {inr b} g₀ g₁ = g₁
 
 {- Empty/Unit -}
 data Empty : Set where
@@ -70,38 +70,38 @@ data Unit : Set where
   * : Unit
 
 -- Recursors
-rec_empty : {C : Set} →
+rec-empty : {C : Set} →
             Empty → C
-rec_empty ()
+rec-empty ()
 
-rec_unit : {C : Set} →
+rec-unit : {C : Set} →
            C → Unit
-rec_unit c = *
+rec-unit c = *
 
 {- Booleans -}
 data Bool : Set where
-  true  : Bool
-  false : Bool
+  true-b  : Bool
+  false-b : Bool
 
 -- Recursor
-rec_bool : {C : Set} →
+rec-b : {C : Set} →
            Bool → C → C → C
-rec_bool true  c₀ c₁ = c₀
-rec_bool false c₀ c₁ = c₁
+rec-b true-b  c₀ c₁ = c₀
+rec-b false-b c₀ c₁ = c₁
 
 -- Induction
-ind_bool : {C : Bool → Set} {x : Bool} →
-           C true → C false → C x
-ind_bool {C} {true}  c₀ c₁ = c₀
-ind_bool {C} {false} c₀ c₁ = c₁
+ind-b : {C : Bool → Set} {x : Bool} →
+           C true-b → C false-b → C x
+ind-b {C} {true-b}  c₀ c₁ = c₀
+ind-b {C} {false-b} c₀ c₁ = c₁
 
 -- Example Functions
 if_then_else_ : {C : Set} →
                 Bool → C → C → C
-if b then c₀ else c₁ = rec_bool b c₀ c₁
+if b then c₀ else c₁ = rec-b b c₀ c₁
 
-not : Bool → Bool
-not b = rec_bool b false true
+not-b : Bool → Bool
+not-b b = rec-b b false-b true-b
 
 {- Natural Numbers -}
 data ℕ : Set where
@@ -109,27 +109,27 @@ data ℕ : Set where
   succ : ℕ → ℕ
 
 -- Recursor
-rec_nat : {C : Set} →
+rec-nat : {C : Set} →
           C → (ℕ → C → C) → ℕ → C
-rec_nat c₀ cs zero = c₀
-rec_nat c₀ cs (succ n) = cs n (rec_nat c₀ cs n)
+rec-nat c₀ cs zero = c₀
+rec-nat c₀ cs (succ n) = cs n (rec-nat c₀ cs n)
 
 -- Induction
-ind_nat : {C : ℕ → Set} {n : ℕ} →
+ind-nat : {C : ℕ → Set} {n : ℕ} →
           C zero → ((n : ℕ) → C n → C (succ n)) → C n
-ind_nat {C} {zero} c₀ cs = c₀
-ind_nat {C} {succ n} c₀ cs = cs n (ind c₀ nat cs)
+ind-nat {C} {zero} c₀ cs = c₀
+ind-nat {C} {succ n} c₀ cs = cs n (ind-nat c₀ cs)
 
 -- Example functions
-double = rec_nat zero (λ n → λ y → succ (succ y))
-add = rec_nat id (λ n → λ g → λ m → succ (g m))
+double = rec-nat zero (λ n → λ y → succ (succ y))
+add = rec-nat id (λ n → λ g → λ m → succ (g m))
 
-assoc_add : ∀ i j k → add i (add j k) ≡ add (add i j) k
-assoc_add zero j k = refl
-assoc_add (succ i) j k = ap succ IH
+assoc-add : ∀ i j k → add i (add j k) ≡ add (add i j) k
+assoc-add zero j k = refl
+assoc-add (succ i) j k = ap succ IH
  where
   IH : add i (add j k) ≡ add (add i j) k
-  IH = assoc_add i j k
+  IH = assoc-add i j k
 
 {- Fins -}
 data Fin : ℕ → Set where
@@ -142,3 +142,54 @@ A ≅ B = Σ \(f : A → B) →
         Σ \(g : B → A) →
         ((x : A) → g (f x) ≡ x) ×
         ((y : B) → f (g y) ≡ y)
+
+{- Logic with types -}
+true = Unit
+false = Empty
+
+_and_ : Set → Set → Set
+A and B = A × B
+
+_or_ : Set → Set → Set
+A or B = A + B
+
+_implies_ : Set → Set → Set
+A implies B = A → B
+
+_iff_ : Set → Set → Set
+A iff B = (A → B) × (B → A)
+
+not : Set → Set
+not A = A → Empty
+
+postulate
+ dne : {A : Set} →
+       not (not A) → A
+
+and-so-or : {A B : Set} →
+            (A and B) implies (A or B)
+and-so-or (x , y) = inl x -- Or inr y if you prefer.
+
+de-morgan-1 : {A B : Set} →
+              (not A and not B) iff not (A or B)
+de-morgan-1 = l2r , r2l
+ where
+  l2r : {A B : Set} →
+        (not A and not B) implies not (A or B)
+  l2r (x , y) (inl a) = x a
+  l2r (x , y) (inr b) = y b
+  r2l : {A B : Set} →
+        not (A or B) implies (not A and not B)
+  r2l p = (λ a → p (inl a)) , (λ b → p (inr b))
+
+de-morgan-2 : {A B : Set} →
+              (not A or not B) iff not (A and B)
+de-morgan-2 = l2r , r2l
+ where
+  l2r : {A B : Set} →
+        (not A or not B) implies not (A and B)
+  l2r (inl a) (x , y) = a x
+  l2r (inr b) (x , y) = b y
+  r2l : {A B : Set} →
+        not (A and B) implies (not A or not B)
+  r2l {A} {B} p = inl {!!}
