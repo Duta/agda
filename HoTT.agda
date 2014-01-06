@@ -144,6 +144,7 @@ A ≅ B = Σ \(f : A → B) →
         ((y : B) → f (g y) ≡ y)
 
 {- Logic with types -}
+-- Propositional Logic
 true = Unit
 false = Empty
 
@@ -166,6 +167,14 @@ postulate
  dne : {A : Set} →
        not (not A) → A
 
+-- Predicate Logic
+for-all : (A : Set) → (P : A → Set) → Set
+for-all A P = (x : A) → P x
+
+there-exists : (A : Set) → (P : A → Set) → Set
+there-exists A P = Σ \x → P x
+
+-- Examples
 and-so-or : {A B : Set} →
             (A and B) implies (A or B)
 and-so-or (x , y) = inl x -- Or inr y if you prefer.
@@ -193,3 +202,14 @@ de-morgan-2 = l2r , r2l
   r2l : {A B : Set} →
         not (A and B) implies (not A or not B)
   r2l {A} {B} p = inl {!!}
+
+and-in-out : {A : Set} {P Q : A → Set} →
+             ((x : A) → P x and Q x) iff (for-all A P and for-all A Q)
+and-in-out = l2r , r2l
+ where
+  l2r : {A : Set} {P Q : A → Set} →
+        ((x : A) → P x and Q x) implies (for-all A P and for-all A Q)
+  l2r p = (λ x → π₁ (p x)) , (λ x → π₂ (p x))
+  r2l : {A : Set} {P Q : A → Set} →
+        (for-all A P and for-all A Q) implies ((x : A) → P x and Q x)
+  r2l p = λ x → π₁ p x , π₂ p x
