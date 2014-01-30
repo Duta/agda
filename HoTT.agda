@@ -4,6 +4,19 @@ id : {X : Set} →
      X → X
 id x = x
 
+{- Universe Levels -}
+
+postulate
+  Level  : Set
+  zero-l : Level
+  succ-l : Level → Level
+  max-l  : Level → Level → Level
+
+{-# BUILTIN LEVEL     Level  #-}
+{-# BUILTIN LEVELZERO zero-l #-}
+{-# BUILTIN LEVELSUC  succ-l #-}
+{-# BUILTIN LEVELMAX  max-l  #-}
+
 {- Judgemental Equality -}
 data _≡_ {X : Set} : X → X → Set where
   refl : {x : X} → x ≡ x
@@ -21,14 +34,19 @@ ap : {X Y : Set} {x y : X} →
 ap f refl = refl
 
 {- Dependent Pair Types -}
-data Σ {A : Set} (B : A → Set) : Set where
-  _,_ : (x : A) → B x → Σ {A} B
+-- Simple definition
+-- data Σ {A : Set} (B : A → Set) : Set where
+--   _,_ : (x : A) → B x → Σ {A} B
 
-π₁ : {A : Set} {B : A → Set} →
+-- Universe polymorphic definition
+data Σ {i j : Level} {A : Set i} (B : A → Set j) : Set (max-l i j) where
+  _,_ : (x : A) → B x → Σ {i} {j} {A} B
+
+π₁ : {i j : Level} {A : Set i} {B : A → Set j} →
      (Σ \(x : A) → B x) → A
 π₁ (x , y) = x
 
-π₂ : {A : Set} {B : A → Set} →
+π₂ : {i j : Level} {A : Set i} {B : A → Set j} →
      (p : Σ \(x : A) → B x) → B (π₁ p)
 π₂ (x , y) = y
 
@@ -215,14 +233,20 @@ and-in-out = l2r , r2l
   r2l p = λ x → π₁ p x , π₂ p x
 
 {- Semigroups -}
-semigroup : {A : Set} → Set
-semigroup {A} = Σ \(m : A → A → A) →
-                (x y z : A) →
-                m x (m y z) ≡ m (m x y) z
+magma : Set₁
+magma = Σ \(A : Set) → (A → A → A)
+
+semigroup : Set₁
+semigroup = Σ \(m : magma) →
+                (x y z : π₁ m) →
+                (π₂ m) x ((π₂ m) y z) ≡ (π₂ m) ((π₂ m) x y) z
 
 -- Examples
-add-magma : semigroup {ℕ}
-add-magma = add , assoc-add
+add-magma : magma
+add-magma = ℕ , add
+
+add-semigroup : semigroup
+add-semigroup = add-magma , assoc-add
  where
   assoc-add : ∀ i j k → add i (add j k) ≡ add (add i j) k
   assoc-add zero j k = refl
