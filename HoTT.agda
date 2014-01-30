@@ -232,28 +232,71 @@ and-in-out = l2r , r2l
         (for-all A P and for-all A Q) implies ((x : A) → P x and Q x)
   r2l p = λ x → π₁ p x , π₂ p x
 
-{- Semigroups -}
+{- Algebraic Structures -}
 magma : Set₁
 magma = Σ \(A : Set) → (A → A → A)
 
+assoc : (m : magma) → (x y z : π₁ m) → Set
+assoc m x y z = (x ∙ (y ∙ z)) ≡ ((x ∙ y) ∙ z)
+ where
+  _∙_ = π₂ m
+
+identity : (m : magma) → (x i : π₁ m) → Set
+identity m x i = ((i ∙ x) ≡ x) × ((x ∙ i) ≡ x)
+ where
+  _∙_ = π₂ m
+
+has-identity : (m : magma) → π₁ m → Set
+has-identity m x = Σ \(i : A) → identity m x i
+ where
+  A = π₁ m
+
+idempotent : (m : magma) → π₁ m → Set
+idempotent m i = (i ∙ i) ≡ i
+ where
+  _∙_ = π₂ m
+
+has-idempotent : (m : magma) → Set
+has-idempotent m = Σ \(i : A) → idempotent m i
+ where
+  A = π₁ m
+
 semigroup : Set₁
-semigroup = Σ \(m : magma) →
-                (x y z : π₁ m) →
-                (π₂ m) x ((π₂ m) y z) ≡ (π₂ m) ((π₂ m) x y) z
+semigroup = Σ \(m : magma) → (x y z : π₁ m) → assoc m x y z
+
+monoid : Set₁
+monoid = Σ \(s : semigroup) → (x : π₁ (π₁ s)) → has-identity (π₁ s) x
 
 -- Examples
 add-magma : magma
 add-magma = ℕ , add
 
-add-semigroup : semigroup
-add-semigroup = add-magma , assoc-add
+add-assoc : ∀ i j k → assoc add-magma i j k
+add-assoc zero j k = refl
+add-assoc (succ i) j k = ap succ IH
  where
-  assoc-add : ∀ i j k → add i (add j k) ≡ add (add i j) k
-  assoc-add zero j k = refl
-  assoc-add (succ i) j k = ap succ IH
-   where
-    IH : add i (add j k) ≡ add (add i j) k
-    IH = assoc-add i j k
+  IH = add-assoc i j k
+
+add-has-identity : ∀ i → has-identity add-magma i
+add-has-identity i = zero , (left-id i , right-id i)
+ where
+  left-id : ∀ i → add zero i ≡ i
+  left-id i = refl
+  right-id : ∀ i → add i zero ≡ i
+  right-id zero = refl
+  right-id (succ i) = ap succ (right-id i)
+
+add-has-idempotent : has-idempotent add-magma
+add-has-idempotent = zero , zero-idempotent
+ where
+  zero-idempotent : add zero zero ≡ zero
+  zero-idempotent = refl
+
+add-semigroup : semigroup
+add-semigroup = add-magma , add-assoc
+
+add-monoid : monoid
+add-monoid = add-semigroup , add-has-identity
 
 {- Path induction -}
 path-ind : {A : Set} {C : (x y : A) → x ≡ y → Set} →
