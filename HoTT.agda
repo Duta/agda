@@ -159,6 +159,28 @@ n ≤ m = Σ \k → (add n k ≡ m)
 _<_ : ℕ → ℕ → Set
 n < m = Σ \k → (add n (succ k) ≡ m)
 
+{- Integers -}
+data ℤ : Set where
+  +_   : ℕ → ℤ
+  -1-_ : ℕ → ℤ
+
+-- Example functions
+pred-int : ℤ → ℤ
+pred-int (+ zero) = -1- zero
+pred-int (+ succ i) = + i
+pred-int (-1- i) = -1- succ i
+
+succ-int : ℤ → ℤ
+succ-int (+ i) = + succ i
+succ-int (-1- zero) = + zero
+succ-int (-1- succ i) = -1- i
+
+sub-int : ℤ → ℤ → ℤ
+sub-int i (+ zero) = i
+sub-int i (+ succ j) = pred-int (sub-int i (+ j))
+sub-int i (-1- zero) = succ-int i
+sub-int i (-1- succ j) = succ-int (sub-int i (-1- j))
+
 {- Fins -}
 data Fin : ℕ → Set where
   zero : {n : ℕ} → Fin (succ n)
