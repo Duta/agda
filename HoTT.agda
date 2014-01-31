@@ -148,8 +148,9 @@ ind-nat {C} {zero} c₀ cs = c₀
 ind-nat {C} {succ n} c₀ cs = cs n (ind-nat c₀ cs)
 
 -- Example functions
-double = rec-nat zero (λ n → λ y → succ (succ y))
-add = rec-nat id (λ n → λ g → λ m → succ (g m))
+double = rec-nat zero (λ i → λ rec → succ (succ rec))
+add = rec-nat id (λ i → λ rec → λ j → succ (rec j))
+mul = rec-nat (λ _ → zero) (λ i → λ rec → λ j → add j (rec j))
 
 -- Inequalities
 _≤_ : ℕ → ℕ → Set
@@ -261,9 +262,7 @@ identity m x i = ((i ∙ x) ≡ x) × ((x ∙ i) ≡ x)
   _∙_ = π₂ m
 
 has-identity : (m : magma) → π₁ m → Set
-has-identity m x = Σ \(i : A) → identity m x i
- where
-  A = π₁ m
+has-identity m x = Σ \i → identity m x i
 
 idempotent : (m : magma) → π₁ m → Set
 idempotent m i = (i ∙ i) ≡ i
@@ -271,9 +270,7 @@ idempotent m i = (i ∙ i) ≡ i
   _∙_ = π₂ m
 
 has-idempotent : (m : magma) → Set
-has-idempotent m = Σ \(i : A) → idempotent m i
- where
-  A = π₁ m
+has-idempotent m = Σ \i → idempotent m i
 
 semigroup : Set₁
 semigroup = Σ \(m : magma) →
@@ -289,7 +286,7 @@ commutative-monoid = Σ \(mo : monoid) →
                      let m = π₁ (π₁ mo) in
                      (x y : π₁ m) → (commutative m x y)
 
--- Examples
+-- Add examples
 add-magma : magma
 add-magma = ℕ , add
 
@@ -316,19 +313,17 @@ add-commutative (succ i) (succ j) = ap succ (trans p₁ p₂)
   p₂ = add-commutative (succ i) j
 
 add-has-identity : ∀ i → has-identity add-magma i
-add-has-identity i = zero , (left-id i , right-id i)
+add-has-identity i = id-elem , (left-id i , right-id i)
  where
-  left-id : ∀ i → add zero i ≡ i
+  id-elem = zero
+  left-id : ∀ i → add id-elem i ≡ i
   left-id i = refl
-  right-id : ∀ i → add i zero ≡ i
+  right-id : ∀ i → add i id-elem ≡ i
   right-id zero = refl
   right-id (succ i) = ap succ (right-id i)
 
 add-has-idempotent : has-idempotent add-magma
-add-has-idempotent = zero , zero-idempotent
- where
-  zero-idempotent : add zero zero ≡ zero
-  zero-idempotent = refl
+add-has-idempotent = zero , refl
 
 add-semigroup : semigroup
 add-semigroup = add-magma , add-associative
@@ -338,6 +333,40 @@ add-monoid = add-semigroup , add-has-identity
 
 add-commutative-monoid : commutative-monoid
 add-commutative-monoid = add-monoid , add-commutative
+
+-- Mul examples
+mul-magma : magma
+mul-magma = ℕ , mul
+
+mul-associative : ∀ i j k → associative mul-magma i j k
+mul-associative zero j k = refl
+mul-associative (succ i) j k = {!!}
+ where
+  IH = mul-associative i j k
+
+mul-commutative : ∀ i j → commutative mul-magma i j
+mul-commutative i j = {!!}
+
+mul-has-identity : ∀ i → has-identity mul-magma i
+mul-has-identity i = id-elem , (left-id i , right-id i)
+ where
+  id-elem = succ zero
+  left-id : ∀ i → mul id-elem i ≡ i
+  left-id i = {!!}
+  right-id : ∀ i → mul i id-elem ≡ i
+  right-id i = {!!}
+
+mul-has-idempotent : has-idempotent mul-magma
+mul-has-idempotent = succ zero , refl
+
+mul-semigroup : semigroup
+mul-semigroup = mul-magma , mul-associative
+
+mul-monoid : monoid
+mul-monoid = mul-semigroup , mul-has-identity
+
+mul-commutative-monoid : commutative-monoid
+mul-commutative-monoid = mul-monoid , mul-commutative
 
 {- Path induction -}
 path-ind : {A : Set} {C : (x y : A) → x ≡ y → Set} →
