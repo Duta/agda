@@ -245,13 +245,13 @@ and-in-out = l2r , r2l
 magma : Set₁
 magma = Σ \(A : Set) → (A → A → A)
 
-assoc : (m : magma) → (x y z : π₁ m) → Set
-assoc m x y z = (x ∙ (y ∙ z)) ≡ ((x ∙ y) ∙ z)
+associative : (m : magma) → (x y z : π₁ m) → Set
+associative m x y z = (x ∙ (y ∙ z)) ≡ ((x ∙ y) ∙ z)
  where
   _∙_ = π₂ m
 
-commut : (m : magma) → (x y : π₁ m) → Set
-commut m x y = (x ∙ y) ≡ (y ∙ x)
+commutative : (m : magma) → (x y : π₁ m) → Set
+commutative m x y = (x ∙ y) ≡ (y ∙ x)
  where
   _∙_ = π₂ m
 
@@ -276,26 +276,34 @@ has-idempotent m = Σ \(i : A) → idempotent m i
   A = π₁ m
 
 semigroup : Set₁
-semigroup = Σ \(m : magma) → (x y z : π₁ m) → assoc m x y z
+semigroup = Σ \(m : magma) →
+            (x y z : π₁ m) → associative m x y z
 
 monoid : Set₁
-monoid = Σ \(s : semigroup) → (x : π₁ (π₁ s)) → has-identity (π₁ s) x
+monoid = Σ \(s : semigroup) →
+         let m = π₁ s in
+         (x : π₁ m) → has-identity m x
+
+commutative-monoid : Set₁
+commutative-monoid = Σ \(mo : monoid) →
+                     let m = π₁ (π₁ mo) in
+                     (x y : π₁ m) → (commutative m x y)
 
 -- Examples
 add-magma : magma
 add-magma = ℕ , add
 
-add-assoc : ∀ i j k → assoc add-magma i j k
-add-assoc zero j k = refl
-add-assoc (succ i) j k = ap succ IH
+add-associative : ∀ i j k → associative add-magma i j k
+add-associative zero j k = refl
+add-associative (succ i) j k = ap succ IH
  where
-  IH = add-assoc i j k
+  IH = add-associative i j k
 
-add-commut : ∀ i j → commut add-magma i j
-add-commut zero zero = refl
-add-commut zero (succ j) = ap succ (add-commut zero j)
-add-commut (succ i) zero = ap succ (add-commut i zero)
-add-commut (succ i) (succ j) = ap succ (trans p₁ p₂)
+add-commutative : ∀ i j → commutative add-magma i j
+add-commutative zero zero = refl
+add-commutative zero (succ j) = ap succ (add-commutative zero j)
+add-commutative (succ i) zero = ap succ (add-commutative i zero)
+add-commutative (succ i) (succ j) = ap succ (trans p₁ p₂)
  where
   either-succ : ∀ i j → add (succ i) j ≡ add i (succ j)
   either-succ zero j = refl
@@ -305,7 +313,7 @@ add-commut (succ i) (succ j) = ap succ (trans p₁ p₂)
   p₁ : add i (succ j) ≡ add (succ i) j
   p₁ = sym (either-succ i j)
   p₂ : add (succ i) j ≡ add j (succ i)
-  p₂ = add-commut (succ i) j
+  p₂ = add-commutative (succ i) j
 
 add-has-identity : ∀ i → has-identity add-magma i
 add-has-identity i = zero , (left-id i , right-id i)
@@ -323,10 +331,13 @@ add-has-idempotent = zero , zero-idempotent
   zero-idempotent = refl
 
 add-semigroup : semigroup
-add-semigroup = add-magma , add-assoc
+add-semigroup = add-magma , add-associative
 
 add-monoid : monoid
 add-monoid = add-semigroup , add-has-identity
+
+add-commutative-monoid : commutative-monoid
+add-commutative-monoid = add-monoid , add-commutative
 
 {- Path induction -}
 path-ind : {A : Set} {C : (x y : A) → x ≡ y → Set} →
