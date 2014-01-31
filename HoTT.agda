@@ -64,6 +64,15 @@ ind-deppair g (a , b) = g {a} {b}
 _×_ : Set → Set → Set
 X × Y = Σ \(x : X) → Y
 
+-- Curry/Uncurry
+curry : {A B C : Set} →
+        (A × B → C) → A → B → C
+curry f x y = f (x , y)
+
+uncurry : {A B C : Set} →
+          (A → B → C) → A × B → C
+uncurry f (x , y) = f x y
+
 {- Coproduct Types -}
 data _+_ (A B : Set) : Set where
   inl : A → A + B
