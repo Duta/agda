@@ -241,6 +241,11 @@ assoc m x y z = (x ∙ (y ∙ z)) ≡ ((x ∙ y) ∙ z)
  where
   _∙_ = π₂ m
 
+commut : (m : magma) → (x y : π₁ m) → Set
+commut m x y = (x ∙ y) ≡ (y ∙ x)
+ where
+  _∙_ = π₂ m
+
 identity : (m : magma) → (x i : π₁ m) → Set
 identity m x i = ((i ∙ x) ≡ x) × ((x ∙ i) ≡ x)
  where
@@ -276,6 +281,22 @@ add-assoc zero j k = refl
 add-assoc (succ i) j k = ap succ IH
  where
   IH = add-assoc i j k
+
+add-commut : ∀ i j → commut add-magma i j
+add-commut zero zero = refl
+add-commut zero (succ j) = ap succ (add-commut zero j)
+add-commut (succ i) zero = ap succ (add-commut i zero)
+add-commut (succ i) (succ j) = ap succ (trans p₁ p₂)
+ where
+  either-succ : ∀ i j → add (succ i) j ≡ add i (succ j)
+  either-succ zero j = refl
+  either-succ (succ i) j = ap succ IH
+   where
+    IH = either-succ i j
+  p₁ : add i (succ j) ≡ add (succ i) j
+  p₁ = sym (either-succ i j)
+  p₂ : add (succ i) j ≡ add j (succ i)
+  p₂ = add-commut (succ i) j
 
 add-has-identity : ∀ i → has-identity add-magma i
 add-has-identity i = zero , (left-id i , right-id i)
