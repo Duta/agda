@@ -148,9 +148,9 @@ ind-nat {C} {zero} c₀ cs = c₀
 ind-nat {C} {succ n} c₀ cs = cs n (ind-nat c₀ cs)
 
 -- Example functions
-double = rec-nat zero (λ i → λ rec → succ (succ rec))
-add = rec-nat id (λ i → λ rec → λ j → succ (rec j))
-mul = rec-nat (λ _ → zero) (λ i → λ rec → λ j → add j (rec j))
+double = rec-nat zero (λ _ → λ rec → succ (succ rec))
+add = rec-nat id (λ _ → λ rec → λ j → succ (rec j))
+mul = rec-nat (λ _ → zero) (λ _ → λ rec → λ j → add j (rec j))
 
 -- Inequalities
 _≤_ : ℕ → ℕ → Set
@@ -291,10 +291,9 @@ add-magma : magma
 add-magma = ℕ , add
 
 add-associative : ∀ i j k → associative add-magma i j k
-add-associative zero j k = refl
-add-associative (succ i) j k = ap succ IH
+add-associative i j k = ind-nat {C} {i} refl (λ _ → λ ind → ap succ ind)
  where
-  IH = add-associative i j k
+  C = λ i → add i (add j k) ≡ add (add i j) k
 
 add-commutative : ∀ i j → commutative add-magma i j
 add-commutative zero zero = refl
@@ -303,10 +302,9 @@ add-commutative (succ i) zero = ap succ (add-commutative i zero)
 add-commutative (succ i) (succ j) = ap succ (trans p₁ p₂)
  where
   either-succ : ∀ i j → add (succ i) j ≡ add i (succ j)
-  either-succ zero j = refl
-  either-succ (succ i) j = ap succ IH
+  either-succ i j = ind-nat {C} {i} refl (λ _ → λ ind → ap succ ind)
    where
-    IH = either-succ i j
+    C = λ i → add (succ i) j ≡ add i (succ j)
   p₁ : add i (succ j) ≡ add (succ i) j
   p₁ = sym (either-succ i j)
   p₂ : add (succ i) j ≡ add j (succ i)
@@ -319,8 +317,9 @@ add-has-identity i = id-elem , (left-id i , right-id i)
   left-id : ∀ i → add id-elem i ≡ i
   left-id i = refl
   right-id : ∀ i → add i id-elem ≡ i
-  right-id zero = refl
-  right-id (succ i) = ap succ (right-id i)
+  right-id i = ind-nat {C} {i} refl (λ _ → λ ind → ap succ ind)
+   where
+    C = λ i → add i id-elem ≡ i
 
 add-has-idempotent : has-idempotent add-magma
 add-has-idempotent = zero , refl
