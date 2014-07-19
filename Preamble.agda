@@ -3,8 +3,10 @@ module Preamble where
 open import Level
 open import Relation.Binary.PropositionalEquality
 
-data Σ {i j} {A : Set i} (B : A → Set j) : Set (i ⊔ j) where
-  _,_ : (x : A) → B x → Σ {i} {j} {A} B
+data Σ {A : Set} (B : A → Set) : Set where
+  _,_ : (x : A) → B x → Σ {A} B
+--data Σ {i j} {A : Set i} (B : A → Set j) : Set (i ⊔ j) where
+--  _,_ : (x : A) → B x → Σ {i} {j} {A} B
 
 π₁ : {A : Set} {B : A → Set} →
      (Σ \(x : A) → B x) → A
