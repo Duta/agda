@@ -17,14 +17,22 @@ suc-inj {suc m} {zero} ()
 suc-inj {suc m} {suc .m} refl = refl
 
 {-
-rebuild : {A B : Set} {C : A × B → Set}
+rebuild' : {A B : Set} {C : A × B → Set}
         → (d : Σ {A × B} C)
         → (let π'₁₁ = π₁ (π₁ d))
         → (let π'₁₂ = π₂ (π₁ d))
-        → (let π'₂  = π₂ d)
+        → (let π'₂  = π₂ d )
+        → (π'₁₁ , π'₁₂) , π'₂ ≡ d
+rebuild' ((π'₁₁ , π'₁₂) , π'₂) = refl
+-}
+
+rebuild : ∀ {A B C}
+        → (d : Σ \(p : A × B) → C)
+        → (let π'₁₁ = π₁ (π₁ d))
+        → (let π'₁₂ = π₂ (π₁ d))
+        → (let π'₂  = π₂ d )
         → (π'₁₁ , π'₁₂) , π'₂ ≡ d
 rebuild ((π'₁₁ , π'₁₂) , π'₂) = refl
--}
 
 {- Agda doesn't think this terminates
 zip : ∀ {A B} → (Σ \(p : List A × List B) → len (π₁ p) ≡ len (π₂ p)) → List (A × B)
@@ -78,16 +86,15 @@ un-zip-iso = zip , (unzip , (l2r , r2l))
       → (xs : List (A × B))
       → zip (unzip xs) ≡ xs
   r2l [] = refl
-  r2l {A} {B} (x₁ , x₂ ∷ xs) = cong (λ xs' → x₁ , x₂ ∷ xs') (goal {A} {B})
+  r2l (x₁ , x₂ ∷ xs) = cong (λ xs' → x₁ , x₂ ∷ xs') goal
    where
     IH : zip (unzip xs) ≡ xs
     IH = r2l xs
     xs₁ = π₁ (π₁ (unzip xs))
     ys₁ = π₂ (π₁ (unzip xs))
     p₁  = π₂ (unzip xs)
-    r2l₁ : {A B : Set} →  (π₁ (π₁ (unzip xs)) , π₂ (π₁ (unzip xs))) , π₂ (unzip xs) ≡ unzip xs
-    r2l₁ = {!rebuild {List A} {List B} {λ p → len (π₁ p) ≡ len (π₂ p)} (unzip xs)!}
-    goal : {A B : Set} → zip ((xs₁ , ys₁) , p₁)
-           ≡ xs
-    goal {A} {B} = trans (cong zip (r2l₁ {A} {B})) IH
+    r2l₁ : (π₁ (π₁ (unzip xs)) , π₂ (π₁ (unzip xs))) , π₂ (unzip xs) ≡ unzip xs
+    r2l₁ = {!rebuild (unzip xs)!}
+    goal : zip ((xs₁ , ys₁) , p₁) ≡ xs
+    goal = trans (cong zip r2l₁) IH
 

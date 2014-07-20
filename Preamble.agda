@@ -1,6 +1,5 @@
 module Preamble where
 
-open import Level
 open import Relation.Binary.PropositionalEquality
 
 data Σ {A : Set} (B : A → Set) : Set where
