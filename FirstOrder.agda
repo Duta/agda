@@ -12,6 +12,7 @@ module FirstOrder
  where
 
 open import Data.Bool hiding (T)
+open import Data.Product
 open import Data.Vec
 
 infixr 0 _$_
@@ -77,3 +78,9 @@ data WFF : Set where
 socrates-is-in-trouble : (Human Mortal : P 1) (socrates : C) (x : V) → WFF
 socrates-is-in-trouble H M s x = (((H $ [ c s ]) `) ∧` (∀` x ⇒ (((H $ [ v x ]) `) →` ((M $ [ v x ]) `)))) →` ((M $ [ c s ]) `)
 -}
+
+-- Interpretations
+I : (U : Set) → Set
+I U = (C → U)
+    × (∀ {n} → F n → Vec T n → (Vec U n → U))
+    × (∀ {n} → P n → Vec T n → (Vec U n → Bool))
