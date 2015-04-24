@@ -11,7 +11,7 @@ module FirstOrder
   (P : ℕ → Set)
  where
 
-open import Data.Bool hiding (T) renaming (Bool to ₂; true to ⊤; false to ⊥)
+open import Data.Bool hiding (T)
 open import Data.Vec
 
 infixr 0 _$_
@@ -51,12 +51,29 @@ Mortality : A
 Mortality = Mortal $ [ c socrates ]
 -}
 
-is-term-ground : T → ₂
-is-term-ground (v x) = ⊥
-is-term-ground (c x) = ⊤
---is-term-ground (_ $ xs) = foldr (λ _ → ₂) (λ t b → is-term-ground t ∧ b) ⊤ xs
-is-term-ground (_ $ xs) = all-ground xs
- where
-  all-ground : ∀ {n} → Vec T n → ₂
-  all-ground [] = ⊤
+mutual
+  all-ground : ∀ {n} → Vec T n → Bool
+  all-ground [] = true
   all-ground (t ∷ xs) = is-term-ground t ∧ all-ground xs
+--all-ground = foldr (const Bool) (_∧_ ∘ is-term-ground) true
+
+  is-term-ground : T → Bool
+  is-term-ground (v x) = false
+  is-term-ground (c x) = true
+  is-term-ground (_ $ xs) = all-ground xs
+
+is-atom-ground : A → Bool
+is-atom-ground (_ $ xs) = all-ground xs
+
+--   Well-Formed Formulae
+data WFF : Set where
+  ⊤` ⊥` : WFF
+  _` : A → WFF
+  ¬` : WFF → WFF
+  _∧`_ _∨`_ _→`_ _↔`_ : WFF → WFF → WFF
+  ∃`_⇒_ ∀`_⇒_ : V → WFF → WFF
+
+{- Seriously, the dude better be careful
+socrates-is-in-trouble : (Human Mortal : P 1) (socrates : C) (x : V) → WFF
+socrates-is-in-trouble H M s x = (((H $ [ c s ]) `) ∧` (∀` x ⇒ (((H $ [ v x ]) `) →` ((M $ [ v x ]) `)))) →` ((M $ [ c s ]) `)
+-}
