@@ -82,5 +82,5 @@ socrates-is-in-trouble H M s x = (((H $ [ c s ]) `) ∧` (∀` x ⇒ (((H $ [ v 
 -- Interpretations
 I : (U : Set) → Set
 I U = (C → U)
-    × (∀ {n} → F n → Vec T n → (Vec U n → U))
-    × (∀ {n} → P n → Vec T n → (Vec U n → Bool))
+    × (∀ {n} → F n → (Vec U n → U))
+    × (∀ {n} → P n → (Vec U n → Bool))
